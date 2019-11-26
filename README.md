@@ -3,18 +3,25 @@
 ```
 project
 │   README.md
-│   file001.txt    
+│   Query_based_RNN    
+│   GetToThePoint_Pretrained    
 │
-└───folder1
-│   │   file011.txt
-│   │   file012.txt
+└───Query_based_RNN
+│   │   querysum
+│   │   querysum-data
+│   │   GEN_SUM
 │   │
-│   └───subfolder1
-│       │   file111.txt
-│       │   file112.txt
-│       │   ...
+│   └───GEN_SUM
+│       │   attention_softmax
+│       │   output_probablities
+│       │   summaries
 │   
-└───folder2
-    │   file021.txt
-    │   file022.txt
+└───GetToThePoint_Pretrained
+    │   test_output
+    |
+│   └───test_output/test_output
+│       │   articles
+│       │   pointer-gen
+│       │   pointer-gen-cov
+│       │   reference
 ```
