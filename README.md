@@ -17,8 +17,8 @@ project
 │       │   summaries
 │   
 └───GetToThePoint_Pretrained
-    │   test_output
-    |
+|   │   test_output
+|   |
 │   └───test_output/test_output
 │       │   articles
 │       │   pointer-gen
