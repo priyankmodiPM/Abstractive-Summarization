@@ -14,6 +14,10 @@ project
 │   │   querysum
 │   │   querysum-data
 │   │   GEN_SUM
+│   │   DATA
+│   │   VOCAB
+│   │   glove.6B
+│   │   OUTPUT
 │   │
 │   └───GEN_SUM
 │       │   attention_softmax
@@ -46,6 +50,9 @@ project
 │       │   train
 └───────────────────────────────────────
 ```
+
+# PointerGenerator Model - Introduction
+This module presents our code architechture on top of which the other two models are based. We use the OpenNMT to implement our seq2seq model. These mdoels infact close to the current state-of-the-art ones. We use OpenNMT-py, a Pytorch port of OpenNMT, to train a baseline model on the Gigaword summarization dataset. It is worthwhile to note that our implementation is same as the the baseline model presented by the paper `Get To The Point`. 
 
 # PointerGenerator Model - Installation
 ```sh
@@ -147,6 +154,57 @@ python OpenNMT-py/translate.py -gpu 1 \
  -replace_unk
 ```
 
+# PointerGenerator Model - Evaluation
+Calcuating Rogue scores. Execute this command in your terminal.
+```sh
+files2rouge data/gigaword/Giga/test.pred data/gigaword/Giga/task1_ref0_cleaned.txt > eval.v2.log
+```
+
+# GetToThePoint Model - Introduction
+Pointer Generator Models do much better in comparison to the previous ones, but one major problem with the generated summaries is repitition. To solve this problem we use the concept of coverage to keep a track of what has been summarized. This pointer-generator network is a hybrid between the baseline and a pointer network, as it allows both copying words via pointing, and generating words from a fixed vocabulary.
+
+# Query_Based_RNN Model - Introduction
+The model is a seq2seq one with attention and a pointer mechanism, making  it a pointer-generator model. The input for the problem is a document and a query.   These are sequences of words passed to a document encoder and a query encoder respectively. The en-coders’ outputs are then passed to the attentivedecoder,  which generates a summary. Both en-coders, as well as the decoder, use RNNs with GRUs(each having different weights and biases).
+
+# Query_Based_RNN Model - Installation
+```sh
+pip3 install nltk
+pip3 install --user --upgrade tensorflow
+```
+
+# Query_Based_RNN Model - Dataset Generation
+This model is trained on the CNN dataset which can be found here https://cs.nyu.edu/~kcho/DMQA/ Both Questions and Stories need to be downloaded. Extract the two files and place them inside the Query_Based_RNN folder. Download and extract the glove embeddings from https://nlp.stanford.edu/projects/glove/ and place the extracted folder in the Query_Based_RNN as well. We use the 100d embeddings. The final directory structure is again given in the `Directory Structure` section. We already provide the generated vocabularies built(using `python3 build_vocabularies.py`) in the VOCAB folder.
+```sh
+mkdir DATA
+python3 querysum-data/convert_rcdata.py \
+    ./cnn_stories \
+    ./cnn_questions \
+    ./DATA
+```
+# Query_Based_RNN Model - Training
+We stopped the training process at 93.4% of the first epoch due to time constraints. We set a high enough decay rate and so expect that the model was atleast somewhat near convergence. Because of the possible drop in accuracy, we present our observations(see report) from the sample sentences from the actual model as well.
+```sh
+python3 querysum/querysum.py \
+    glove.6B/glove.6B.100d.txt \
+    VOCAB \
+    --mode train \
+    --logdir DATA \
+    --training_dir <path to training set root directory> \
+    --validation_dir <path to validation set root directory> \
+    --batch_size <the batch size, 30 by default>
+```
+
+# Query_Based_RNN Model - Generating Summaries
+```sh
+python3 querysum/querysum.py \
+    ./glove.6B/glove.6B.100d.txt \
+    ./VOCAB \
+    --mode decode \
+    --logdir DATA \
+    --decode_dir <path to dataset directory, containing documents and queries, to generate summaries for> \
+    --decode_out_dir ./OUTPUT
+```
+
 # Literature
 Abstractive Summarization :
   - Abigail See, Peter J. Liu and Christopher D. Manning. Get To The Point: Summarization with Pointer-Generator Networks. (implemented for generic summarisation)
@@ -159,3 +217,16 @@ Query Focused Summarisation :
   - (Paper used for paper presentation) Johan Hasselqvist, Niklas Helmertz, Mikael Kågebäck. Query-Based Abstractive Summarization Using Neural Networks. Link to the paper (implemented for query focused summarisation)
 
    [official documentation]: <http://opennmt.net/OpenNMT-py/options/translate.html>
+
+<!-- ### Plugins
+
+Dillinger is currently extended with the following plugins. Instructions on how to use them in your own application are linked below.
+
+| Plugin | README |
+| ------ | ------ |
+| Dropbox | [plugins/dropbox/README.md][PlDb] |
+| GitHub | [plugins/github/README.md][PlGh] |
+| Google Drive | [plugins/googledrive/README.md][PlGd] |
+| OneDrive | [plugins/onedrive/README.md][PlOd] |
+| Medium | [plugins/medium/README.md][PlMe] |
+| Google Analytics | [plugins/googleanalytics/README.md][PlGa] | -->
